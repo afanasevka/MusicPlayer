@@ -67,7 +67,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     {
         int size = getItemCount();
         mData.clear();
-        this.notifyItemRangeRemoved(0, size-1);
+        this.notifyItemRangeRemoved(0, size);
     }
 
     public void addItem(String item)
