@@ -1,5 +1,7 @@
 package com.Aprod.SimplePlayer;
 
+import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
@@ -13,12 +15,15 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MyRecyclerViewAdapter.ItemClickListener{
 
     MyRecyclerViewAdapter adapter;
-    File currentFile;
+//    File currentFile;
+
+    MediaPlayer mp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,21 +32,36 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-       FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(), "It's ok.", Toast.LENGTH_LONG).show();
                 adapter.addItem("HoHoHo "+adapter.getItemCount());
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
+            }
+        });
+
+        FloatingActionButton fabPlay = findViewById(R.id.fabPlay);
+        fabPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mp == null)
+                    return;
+                if (mp.isPlaying())
+                    mp.pause();
+                else
+                    mp.start();
+                //Toast.makeText(getApplicationContext(), "It's ok.", Toast.LENGTH_LONG).show();
             }
         });
 
 
+//        if (savedInstanceState != null)
+//            currentFile = getFileStreamPath(savedInstanceState.getString("Path"));
+//        else
+            //currentFile = Environment.getRootDirectory();
+        mp = new MediaPlayer();
 
-        //        String path = Environment.getExternalStorageDirectory().toString()+"/Pictures";
-        currentFile = Environment.getRootDirectory();
 
 
         // set up the RecyclerView
@@ -54,9 +74,19 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         updateList();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        try {
+            outState.putString("Path", SimplePlayerApp.getContext().getCurrentFile().getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void updateList()
     {
-        File[] files = currentFile.listFiles();
+        File[] files = SimplePlayerApp.getContext().getCurrentFile().listFiles();
 
         for (int i = 0; i < files.length; i++)
         {
@@ -67,16 +97,38 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
     @Override
     public void onItemClick(View view, int position) {
         Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
-        File[] files = currentFile.listFiles();
+        File[] files = SimplePlayerApp.getContext().getCurrentFile().listFiles();
         String fileName = adapter.getItem(position);
-        for (int i = 0; i < files.length; i++) {
 
-            if (fileName.equals(files[i].getName()))
-            {
-                currentFile = files[i];
-                adapter.clear();
-                updateList();
-                break;
+        if (fileName.endsWith("ogg") || fileName.endsWith("mp3")) {
+            try {
+                String filePath = "";
+                for (int i = 0; i < files.length; i++) {
+
+                    if (fileName.equals(files[i].getName())) {
+                        filePath = files[i].getCanonicalPath();
+                        break;
+                    }
+                }
+                mp.reset();
+
+                mp.setDataSource(filePath);
+                mp.prepare();
+                mp.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            for (int i = 0; i < files.length; i++) {
+
+                if (fileName.equals(files[i].getName())) {
+                    SimplePlayerApp.getContext().setCurrentFile(files[i]);
+//                    currentFile = files[i];
+                    adapter.clear();
+                    updateList();
+                    break;
+                }
             }
         }
 
@@ -98,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
