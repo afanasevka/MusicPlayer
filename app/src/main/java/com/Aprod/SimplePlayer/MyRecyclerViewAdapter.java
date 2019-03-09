@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.Aprod.SimplePlayer;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

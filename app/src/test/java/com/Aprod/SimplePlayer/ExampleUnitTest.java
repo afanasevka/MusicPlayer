@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.Aprod.SimplePlayer;
 
 import org.junit.Test;
 
