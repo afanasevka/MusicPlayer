@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
@@ -31,6 +32,26 @@ public class MainActivity extends AppCompatActivity implements MyRecyclerViewAda
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ImageButton homeButton = findViewById(R.id.homeButton);
+        homeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SimplePlayerApp.getContext().setCurrentFile(Environment.getRootDirectory());
+                adapter.clear();
+                updateList();
+            }
+        });
+
+        ImageButton upButton = findViewById(R.id.upFolderButton);
+        upButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SimplePlayerApp.getContext().setCurrentFile(SimplePlayerApp.getContext().getCurrentFile().getParentFile());
+                adapter.clear();
+                updateList();
+            }
+        });
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
